@@ -11,3 +11,8 @@
 
 #!.yarn/cache
 .pnp.*
+
+# Generated results
+results*/
+*.log
+*/target/
