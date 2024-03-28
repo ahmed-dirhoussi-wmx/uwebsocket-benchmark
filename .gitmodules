@@ -1,0 +1,3 @@
+[submodule "uws-server"]
+	path = uws-server
+	url = git@github.com:guillaume-dupuis-wmx/uws-server.git
