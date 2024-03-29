@@ -29,8 +29,8 @@ To simulate real network conditions, both the client and server are deployed wit
 ## Generate experiment data
 The full benchmark suite runs using a single `docker-compose` file. To run the benchmark:
 
-1. Choose a websocket client and set the correct test params, by default we used the Rust websocket client in `clients/wsrust_client`.
-2. Choose a websocket server implementation in `servers`. By default, we'll use `uwebsocket-js`.
+1. Choose a Websocket client by default we use the Rust Websocket client in `clients/wsrust_client`.
+2. Choose a Websocket server implementation in `servers`. By default, we use `uwebsocket-js`.
     ```yaml
     services:
         wsclient:
@@ -45,19 +45,26 @@ The full benchmark suite runs using a single `docker-compose` file. To run the b
 
 3. Copy the `.env.example` to `.env` and set the results directory name for saving the experiments' results and the resource limits accordingly
     ```bash
-    # Define the volume path for results
-    RESULTS_VOLUME=./results/results-uwsjs
+    # Define the result data directory 
+    RESULTS_VOLUME=results-uwsjs
 
     # Define CPU limit
     SERVER_CPU_LIMIT=1
     CLIENT_CPU_LIMIT=10
     ```
-4. Run the tests using `docker compose up`
+4. Change test parameters in `clients/wsrust_client/entrypoint.sh`
+    ```bash
+    nclients= (1000 3000 5000 10000)
+    batch_sizes=(1)
+    waits=(1000)
+    ```
+
+5. Run the tests using `docker compose up`
 
 ## Generate plots and aggregate metrics
-To generate the latency plots and aggregate metrics, a separate python scripts in `wrangler/generate_results.py` is needed: 
-1. Go to the wrangler directory: `cd wrangler`
-2. Create a python virtual env (using your favorite tool). For example using `uv venv && source .venv/bin/activate`
+To generate the latency plots and aggregate metrics, a separate python scripts in `wrangler/generate_results.py` is provided: 
+
+1. Go to the wrangler directory: `cd wrangler`Create a Python virtual env (using your favorite tool) and activate it. For example using `uv venv && source .venv/bin/activate`
 3. Install dependencies : `uv pip install -r requirements.txt`
 4. Generate plots and results : `python generate_results.py`. The results are saved in `wrangler/{plots,markdowns}`
 
