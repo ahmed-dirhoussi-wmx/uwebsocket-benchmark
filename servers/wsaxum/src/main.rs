@@ -18,7 +18,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use axum::extract::connect_info::ConnectInfo;
 use serde_json;
 
-const WRITE_FACTOR: usize = 4;
+const WRITE_FACTOR: usize = 2;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ClientMessage {
