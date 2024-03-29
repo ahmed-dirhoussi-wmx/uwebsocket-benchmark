@@ -2,11 +2,11 @@ version: "3.0"
 services:
   wsclient:
     container_name: rust_client
-    build: ./ws_client/
+    build: ./clients/wsrust_client/
     depends_on:
       - wsserver
     volumes:
-      - ./results-uwebsocket-cpp:/app/results
+      - ./results/test:/app/results
     tty: true
     cap_add:
       - NET_ADMIN
@@ -17,7 +17,7 @@ services:
 
   wsserver:
     container_name: uwcpp_server
-    build: ./uws-server
+    build: ./servers/uwsjs-server
     ports:
       - 3000:3000
     cap_add:
@@ -26,32 +26,3 @@ services:
       resources:
         limits:
           cpus: '1'
-
-  # wsclient:
-  #   container_name: go_client
-  #   build: ./wsgo_client/
-  #   depends_on:
-  #     - wsserver
-  #   # volumes:
-  #   #   - ./ws_client/results-axum:/app/results
-  #   tty: true
-  #   cap_add:
-  #     - NET_ADMIN
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '5'
-
-  # wsserver:
-  #   container_name: axum-server
-  #   build: ./wsaxum
-  #   cap_add:
-  #     - NET_ADMIN
-  #     - SYS_ADMIN
-  #   privileged: true 
-  #   ports:
-  #     - 3000:3000
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         cpus: '5'
