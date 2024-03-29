@@ -9,10 +9,10 @@ from PIL import Image
 sns.set_style("whitegrid")
 
 
-def latency_markdown(stats, batch_size, n_batchs, waits, md_dir):
+def latency_markdown(name,stats, batch_size, n_batchs, waits, md_dir):
     stats_df = pd.DataFrame(stats)
     path = os.path.join(
-        md_dir, f"latency_nclients_b{batch_size}_n{n_batchs}_w{waits}.md"
+        md_dir, f"{name}_latency_nclients_b{batch_size}_n{n_batchs}_w{waits}.md"
     )
     with open(path, "w") as f:
         f.write(stats_df.to_markdown())
@@ -94,8 +94,18 @@ def plot_latency(server_latency, n_clients, batch_size, n_batchs, wait, save_dir
         f"./{save_dir}/server_latency_c{n_clients}_b{batch_size}_n{n_batchs}_w{wait}.png"
     )
 
+def compute_stats(serie):
+    return {
+        "mean_latency": int(serie.mean()),
+        "max_latency": serie.max(),
+        "min_latency": serie.min(),
+        "p50_latency": serie.median(),
+        "p90_latency": serie.quantile(float(0.9), interpolation="nearest"),
+        "p99_latency": serie.quantile(float(0.99), interpolation="nearest"),
+    }
 
-def plot_results(n_clients, batch_size, n_batchs, wait, csv_path, plots_dir, stats):
+
+def plot_results(n_clients, batch_size, n_batchs, wait, csv_path, plots_dir, server_stats,rt_stats):
     if not os.path.exists(csv_path):
         print(f"{csv_path} experiment doesnt exist")
         return
@@ -107,16 +117,14 @@ def plot_results(n_clients, batch_size, n_batchs, wait, csv_path, plots_dir, sta
     df = df.set_index("timestamp")
 
     server_latency = df["server_latency"]
-    # TODO : add the roundtrip
-    stats[f"{n_clients} clients"] = {
-        "mean_latency": int(server_latency.mean()),
-        "max_latency": server_latency.max(),
-        "min_latency": server_latency.min(),
-        "p50_latency": server_latency.median(),
-        "p90_latency": server_latency.quantile(float(0.9), interpolation="nearest"),
-        "p99_latency": server_latency.quantile(float(0.99), interpolation="nearest"),
-    }
+    roundtrip_latency = df["server_latency"]+ df["client_latency"]
 
+    # Compute stats
+    rt_stats[f"{n_clients} clients"] =   compute_stats(roundtrip_latency)
+    server_stats[f"{n_clients} clients"] = compute_stats(server_latency)
+
+
+    # Plot results
     plot_latency(server_latency, n_clients, batch_size, n_batchs, wait, plots_dir)
     plot_latency_dist(server_latency, n_clients, batch_size, n_batchs, wait, plots_dir)
     plot_latency_quantile(
@@ -125,7 +133,6 @@ def plot_results(n_clients, batch_size, n_batchs, wait, csv_path, plots_dir, sta
     plot_latency_quantile(
         server_latency, 99, n_clients, batch_size, n_batchs, wait, plots_dir
     )
-    return server_latency
 
 
 if __name__ == "__main__":
@@ -148,6 +155,7 @@ if __name__ == "__main__":
     os.makedirs(md_dir, exist_ok=True)
 
     stats_server_latencies = {}
+    stats_rt_latencies= {}
     # For each combination generate plots
     for nc in nclients:
         for b in batch_sizes:
@@ -163,7 +171,8 @@ if __name__ == "__main__":
                     wait=w,
                     csv_path=csv_path,
                     plots_dir=plots_dir,
-                    stats=stats_server_latencies,
+                    server_stats=stats_server_latencies,
+                    rt_stats=stats_rt_latencies,
                 )
 
     # Combine plots for different nb clients
@@ -172,4 +181,5 @@ if __name__ == "__main__":
 
     # Summary statics to markdown
     print(f"Generating latency summary statistics for nclients : {nclients}")
-    latency_markdown(stats_server_latencies, batch_sizes[0], n_batchs, waits[0], md_dir)
+    latency_markdown("server",stats_server_latencies, batch_sizes[0], n_batchs, waits[0], md_dir)
+    latency_markdown("roundtrip",stats_rt_latencies, batch_sizes[0], n_batchs, waits[0], md_dir)

@@ -84,11 +84,23 @@ Understanding tail latency is crucial for ensuring smooth real-time communicatio
 ## Results
 Running the benchmark for `uWebsocket.js` server using `uwsrust_client` for `nclients=(1000 3000 5000 10000)` with client throughput of `1msg/s` :
 
+
+**Server Latency**:  time for message to get to server.
 |              |   1000 clients |   3000 clients |   5000 clients |   10000 clients |
 |:-------------|---------------:|---------------:|---------------:|----------------:|
-| mean_latency |             22 |            109 |            214 |             677 |
-| max_latency  |             44 |            306 |           3316 |            4407 |
+| mean_latency |             27 |             56 |            115 |             355 |
+| max_latency  |            243 |            447 |           3179 |            3909 |
 | min_latency  |             20 |             20 |             20 |              20 |
-| p50_latency  |             22 |            112 |            201 |             571 |
-| p90_latency  |             26 |            171 |            386 |            1534 |
-| p99_latency  |             38 |            281 |            490 |            2447 |
+| p50_latency  |             21 |             41 |             80 |             276 |
+| p90_latency  |             33 |             86 |            283 |             810 |
+| p99_latency  |            135 |            286 |            308 |            1832 |
+
+**RoundTrip Latency**: Time for a message to get to server and back to client
+|              |   1000 clients |   3000 clients |   5000 clients |   10000 clients |
+|:-------------|---------------:|---------------:|---------------:|----------------:|
+| mean_latency |             48 |             77 |            142 |             396 |
+| max_latency  |            264 |            782 |           3201 |            3929 |
+| min_latency  |             40 |             40 |             40 |              40 |
+| p50_latency  |             42 |             61 |            103 |             312 |
+| p90_latency  |             55 |            108 |            305 |             837 |
+| p99_latency  |            158 |            309 |            413 |            1854 |
