@@ -6,14 +6,14 @@ services:
     depends_on:
       - wsserver
     volumes:
-      - ./results/results-uwsjs:/app/results
+      - ./results/${RESULTS_VOLUME}:/app/results
     tty: true
     cap_add:
       - NET_ADMIN
     deploy:
       resources:
         limits:
-          cpus: '10'
+          cpus: ${CLIENT_CPU_LIMIT}
 
   wsserver:
     container_name: uwcpp_server
@@ -25,4 +25,4 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
+          cpus: ${SERVER_CPU_LIMIT}

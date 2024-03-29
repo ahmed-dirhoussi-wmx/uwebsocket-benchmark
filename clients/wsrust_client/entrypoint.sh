@@ -6,7 +6,7 @@ set -e
 tc qdisc add dev eth0 root netem delay 20ms
 ulimit -n 1000000
 
-nclients=(1000 3000 5000 10000)
+nclients= (1) # (1000 3000 5000 10000)
 batch_sizes=(1)
 waits=(1000)
 

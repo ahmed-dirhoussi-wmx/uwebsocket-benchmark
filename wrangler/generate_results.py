@@ -2,17 +2,23 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+
 from PIL import Image
 
 sns.set_style("whitegrid")
 
-def latency_markdown(stats,batch_size,n_batchs,waits,md_dir):
-    stats_df= pd.DataFrame(stats)
-    path = os.path.join(md_dir,f"latency_nclients_b{batch_size}_n{n_batchs}_w{waits}.md")
-    with open(path,"w") as f:
+
+def latency_markdown(stats, batch_size, n_batchs, waits, md_dir):
+    stats_df = pd.DataFrame(stats)
+    path = os.path.join(
+        md_dir, f"latency_nclients_b{batch_size}_n{n_batchs}_w{waits}.md"
+    )
+    with open(path, "w") as f:
         f.write(stats_df.to_markdown())
 
-def concat_imgs_nc(plots_dir,nclients,batch_size,n_batchs,waits):
+
+def concat_imgs_nc(plots_dir, nclients, batch_size, n_batchs, waits):
     names = ["server_latency", "p99", "p90", "server_latency_dist"]
     for base in names:
         imgs_path = []
@@ -89,7 +95,7 @@ def plot_latency(server_latency, n_clients, batch_size, n_batchs, wait, save_dir
     )
 
 
-def plot_results(n_clients, batch_size, n_batchs, wait, csv_path, plots_dir,stats):
+def plot_results(n_clients, batch_size, n_batchs, wait, csv_path, plots_dir, stats):
     if not os.path.exists(csv_path):
         print(f"{csv_path} experiment doesnt exist")
         return
@@ -102,14 +108,14 @@ def plot_results(n_clients, batch_size, n_batchs, wait, csv_path, plots_dir,stat
 
     server_latency = df["server_latency"]
     # TODO : add the roundtrip
-    stats[f"{n_clients} clients"] = { 
-            "mean_latency" : int(server_latency.mean()),
-            "max_latency": server_latency.max(),
-            "min_latency": server_latency.min(),
-            "p50_latency": server_latency.median(),
-            "p90_latency": server_latency.quantile(float(0.9), interpolation="nearest"),
-            "p99_latency": server_latency.quantile(float(0.99), interpolation="nearest"),
-            }   
+    stats[f"{n_clients} clients"] = {
+        "mean_latency": int(server_latency.mean()),
+        "max_latency": server_latency.max(),
+        "min_latency": server_latency.min(),
+        "p50_latency": server_latency.median(),
+        "p90_latency": server_latency.quantile(float(0.9), interpolation="nearest"),
+        "p99_latency": server_latency.quantile(float(0.99), interpolation="nearest"),
+    }
 
     plot_latency(server_latency, n_clients, batch_size, n_batchs, wait, plots_dir)
     plot_latency_dist(server_latency, n_clients, batch_size, n_batchs, wait, plots_dir)
@@ -128,9 +134,13 @@ if __name__ == "__main__":
     waits = [1000]
     n_batchs = 100
 
-    results_dir = "results-uwebsocket-cpp"
+    # Load environment variables from .env file
+    load_dotenv("../.env")
+    results_dir = os.path.basename(os.getenv("RESULTS_VOLUME"))
+
+    # Setup the results directoriesk
     plots_dir = f"plots/{results_dir}"
-    md_dir= f"markdown/{results_dir}"
+    md_dir = f"markdown/{results_dir}"
     # Create a local directory to save the plots and aggregates
     print(f"Creating {plots_dir}...")
     os.makedirs(os.path.join(plots_dir, "results_agg"), exist_ok=True)
@@ -153,13 +163,13 @@ if __name__ == "__main__":
                     wait=w,
                     csv_path=csv_path,
                     plots_dir=plots_dir,
-                    stats=stats_server_latencies
+                    stats=stats_server_latencies,
                 )
 
     # Combine plots for different nb clients
     print("Aggregating results...")
-    # concat_imgs_nc(plots_dir,nclients,batch_sizes[0],n_batchs,waits[0])
+    concat_imgs_nc(plots_dir, nclients, batch_sizes[0], n_batchs, waits[0])
 
-    # Summary statics to markdown 
+    # Summary statics to markdown
     print(f"Generating latency summary statistics for nclients : {nclients}")
-    latency_markdown(stats_server_latencies,batch_sizes[0],n_batchs,waits[0],md_dir)
+    latency_markdown(stats_server_latencies, batch_sizes[0], n_batchs, waits[0], md_dir)

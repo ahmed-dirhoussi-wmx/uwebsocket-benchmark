@@ -24,11 +24,42 @@ The clients are written in Rust, employing the `tokio-tungstenite` library for W
 
 To simulate real network conditions, both the client and server are deployed within separate Docker containers. A simulated network outbound delay of 20ms for each container is introduced to mimic realistic network latency.
 
-## Running the test:
+# Running the benchmarks:
 
-```bash
+## Generate experiment data
+The full benchmark suite runs using a single `docker-compose` file. To run the benchmark:
 
-```
+1. Choose a websocket client and set the correct test params, by default we used the Rust websocket client in `clients/wsrust_client`.
+2. Choose a websocket server implementation in `servers`. By default, we'll use `uwebsocket-js`.
+    ```yaml
+    services:
+        wsclient:
+            container_name: rust_client
+            build: ./clients/wsrust_client/
+            // ...
+        wsserver:
+            container_name: uwcpp_server
+            build: ./servers/uwsjs-server
+            // ...
+    ```
+
+3. Copy the `.env.example` to `.env` and set the results directory name for saving the experiments' results and the resource limits accordingly
+    ```bash
+    # Define the volume path for results
+    RESULTS_VOLUME=./results/results-uwsjs
+
+    # Define CPU limit
+    SERVER_CPU_LIMIT=1
+    CLIENT_CPU_LIMIT=10
+    ```
+4. Run the tests using `docker compose up`
+
+## Generate plots and aggregate metrics
+To generate the latency plots and aggregate metrics, a separate python scripts in `wrangler/generate_results.py` is needed: 
+1. Go to the wrangler directory: `cd wrangler`
+2. Create a python virtual env (using your favorite tool). For example using `uv venv && source .venv/bin/activate`
+3. Install dependencies : `uv pip install -r requirements.txt`
+4. Generate plots and results : `python generate_results.py`. The results are saved in `wrangler/{plots,markdowns}`
 
 ## Results Analysis
 
@@ -43,6 +74,14 @@ Analyzing latency distribution helps identify outliers and assess the consistenc
 **Tail Latency**
 Understanding tail latency is crucial for ensuring smooth real-time communication, especially in latency-sensitive applications.
 
-```
+## Results
+Running the benchmark for `uWebsocket.js` server using `uwsrust_client` for `nclients=(1000 3000 5000 10000)` with client throughput of `1msg/s` :
 
-```
+|              |   1000 clients |   3000 clients |   5000 clients |   10000 clients |
+|:-------------|---------------:|---------------:|---------------:|----------------:|
+| mean_latency |             22 |            109 |            214 |             677 |
+| max_latency  |             44 |            306 |           3316 |            4407 |
+| min_latency  |             20 |             20 |             20 |              20 |
+| p50_latency  |             22 |            112 |            201 |             571 |
+| p90_latency  |             26 |            171 |            386 |            1534 |
+| p99_latency  |             38 |            281 |            490 |            2447 |
