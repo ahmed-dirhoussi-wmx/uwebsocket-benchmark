@@ -6,7 +6,7 @@ services:
     depends_on:
       - wsserver
     volumes:
-      - ./results/test:/app/results
+      - ./results/results-uwsjs:/app/results
     tty: true
     cap_add:
       - NET_ADMIN
