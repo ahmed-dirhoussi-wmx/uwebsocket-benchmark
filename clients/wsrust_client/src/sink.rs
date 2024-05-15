@@ -30,12 +30,12 @@ pub async fn write_results(
     let mut writer = BufWriter::with_capacity(10 * 1024 * 1024, file);
 
     writer
-            .write("timestamp,client_id,msg_id,server_created_at,client_created_at,client_latency,server_latency\n".as_bytes())
+            .write_all("timestamp,client_id,msg_id,server_created_at,client_created_at,client_latency,server_latency\n".as_bytes())
             .await
             .unwrap();
 
     while let Ok(msg) = rx.recv_async().await {
-        writer.write(msg.as_bytes()).await.unwrap();
+        writer.write_all(msg.as_bytes()).await.unwrap();
     }
     writer.flush().await.unwrap()
 }

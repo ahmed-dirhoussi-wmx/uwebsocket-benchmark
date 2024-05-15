@@ -65,6 +65,7 @@ async fn run_sender(
 ) {
     // Distribute workload of clients to not be at lockstep
     sleep(Duration::from_millis(client_id as u64 % 100)).await;
+
     let mut interval = time::interval(Duration::from_millis(wait_ms as u64));
 
     interval.set_missed_tick_behavior(time::MissedTickBehavior::Skip);

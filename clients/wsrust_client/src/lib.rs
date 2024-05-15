@@ -45,7 +45,7 @@ pub struct ServerMessage {
 
 impl ServerMessage {
     pub fn format(&self, recv_ts: u128) -> String {
-        let event = format!(
+        format!(
             // timestamp, client_id, msg_id, server_created_at, client_created_at, client_latency, server_latency
             "{},{},{},{},{},{},{}\n",
             recv_ts,
@@ -55,7 +55,6 @@ impl ServerMessage {
             self.client_ts,
             recv_ts - self.created_at,
             self.server_latency
-        );
-        return event;
+        )
     }
 }
